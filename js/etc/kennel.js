@@ -6,7 +6,7 @@ $(window).ready(function () {
     // TODO: Actually handle errrors
     function StripError(err, val) {
         if (err) {
-            log("Error reading storage, returning null")
+            console.warn("Error reading storage, returning null")
             return null
         }
         return val
@@ -37,7 +37,7 @@ $(window).ready(function () {
                     if (err) {
                         console.error("error when setting item in localForage")
                     } else {
-                        log("wrote key '" + key + "' to storage.")
+                        console.log("wrote key '" + key + "' to storage.")
                     }
                 })
             },
@@ -47,14 +47,14 @@ $(window).ready(function () {
                         console.error("An error occurred during localStorage read.")
                         return null
                     } else {
-                        log("read key '" + key + "' from storage.")
+                        console.log("read key '" + key + "' from storage.")
                     }
                     callback(val)
                 })
             },
             removeItem: function(key) {
                 localforage.removeItem(key, function(thing) {
-                    log("removed item from storage")
+                    console.log("removed item from storage")
                 })
             }
         }
@@ -85,10 +85,11 @@ $(window).ready(function () {
     })
     Cryptodog.storage.getItem('customServers', function (key) {
         if (key) {
-            $('#customServerSelector').empty()
-            var servers = $.parseJSON(key)
-            $.each(servers, function (name) {
-                $('#customServerSelector').append(
+            document.getElementById("customServerSelector").innerHTML = "";
+            var servers = JSON.parse(key)
+            for (var name in servers) {
+                if (servers.hasOwnProperty(name)) {
+                    document.getElementById('customServerSelector').appendChild(
                     Mustache.render(Cryptodog.templates['customServer'], {
                         name: name,
                         domain: servers[name]['domain'],
@@ -96,17 +97,18 @@ $(window).ready(function () {
                         Relay: servers[name]['relay']
                     })
                 )
-            })
+                }
+            }
         }
     })
 
     // Load nickname settings.
     Cryptodog.storage.getItem('myNickname', function (key) {
         if (key) {
-            $('#nickname').animate({ 'color': 'transparent' }, function () {
-                $(this).val(key)
-                $(this).animate({ 'color': '#FFF' })
-            })
+            //$('#nickname').animate({ 'color': 'transparent' }, function () {
+                document.getElementById("nickname").value = key;
+           //     $(this).animate({ 'color': '#FFF' })
+            //})
         }
     })
 
@@ -114,13 +116,13 @@ $(window).ready(function () {
     window.setTimeout(function () {
         Cryptodog.storage.getItem('desktopNotifications', function (key) {
             if (key === 'true') {
-                $('#notifications').click()
+                document.getElementById("notifications").focus();
                 $('#utip').hide()
             }
         })
         Cryptodog.storage.getItem('audioNotifications', function (key) {
             if ((key === 'true') || !key) {
-                $('#audio').click()
+                document.getElementById("notifications").focus();
                 $('#utip').hide()
             }
         })

@@ -50,7 +50,7 @@ var notifImg = "img/cryptodog-logo.png";
 
 
 Notification.requestPermission(function(permission){
-	log("asked for notification permission, got '" + permission + "'");
+	console.log("asked for notification permission, got '" + permission + "'");
 });
 
 /*
@@ -58,9 +58,10 @@ Notification.requestPermission(function(permission){
 END GLOBAL SCOPE
 -------------------
 */
+/*/if (typeof(window) !== 'undefined') { $(window).ready(function() {
+'use strict';*/
 
-if (typeof(window) !== 'undefined') { $(window).ready(function() {
-'use strict';
+document.addEventListener("DOMContentLoaded", function(event) {
 
 /*
 -------------------
@@ -69,7 +70,7 @@ INTIALIZATION
 */
 
 // Set version number in UI.
-$('#version').text(Cryptodog.version)
+document.getElementById('version').textContent = (Cryptodog.version)
 
 // Seed RNG.
 Cryptodog.random.setSeed(Cryptodog.random.generateSeed())
@@ -180,7 +181,7 @@ Cryptodog.addToConversation = function(message, nickname, conversation, type) {
 		})
 		conversationBuffers[conversation] += message
 		if (conversation === Cryptodog.me.currentBuddy) {
-			$('#conversationWindow').append(message)
+			document.getElementById('conversationWindow').append(message)
 			$('.missingRecipients').last().animate({'top': '0', 'opacity': '1'}, 100)
 			scrollDownConversation(400, true)
 		}
@@ -205,20 +206,20 @@ Cryptodog.addToConversation = function(message, nickname, conversation, type) {
 
 	conversationBuffers[conversation] += renderedMessage
 	if (conversation === Cryptodog.me.currentBuddy) {
-		$('#conversationWindow').append(renderedMessage)
+		document.getElementById('conversationWindow').append(renderedMessage)
 		$('.line').last().animate({'top': '0', 'opacity': '1'}, 100)
 		bindSenderElement($('.line').last().find('.sender'))
 		scrollDownConversation(400, true)
 	}
 	else {
-		$('#buddy-' + conversation).addClass('newMessage')
+		document.getElementById('buddy-' + conversation).addClass('newMessage')
 	}
 }
 
 // Show a preview for a received message from a buddy.
 // Message previews will not overlap and are removed after 5 seconds.
 Cryptodog.messagePreview = function(message, nickname) {
-	var buddyElement = $('#buddy-' + Cryptodog.buddies[nickname].id)
+	var buddyElement = document.getElementById('buddy-' + Cryptodog.buddies[nickname].id)
 	if (!buddyElement.attr('data-utip')) {
 		if (message.length > 15) {
 			message = message.substring(0, 15) + '..'
@@ -236,11 +237,11 @@ Cryptodog.messagePreview = function(message, nickname) {
 
 // Handles login failures.
 Cryptodog.loginFail = function(message) {
-	$('#loginInfo').text(message)
-	$('#bubble').animate({'left': '+=5px'}, 130)
+	document.getElementById('loginInfo').textContent = (message)
+	document.getElementById('bubble').animate({'left': '+=5px'}, 130)
 		.animate({'left': '-=10px'}, 130)
 		.animate({'left': '+=5px'}, 130)
-	$('#loginInfo').animate({'background-color': '#E93028'}, 200)
+	document.getElementById('loginInfo').animate({'background-color': '#E93028'}, 200)
 }
 
 // Handle detected new keys.
@@ -260,9 +261,9 @@ Cryptodog.removeAuthAndWarn = function(nickname) {
 		closeable: true,
 		height: 250,
 		onAppear: function() {
-			$('#openAuth').unbind().bind('click', function() {
+			document.getElementById('openAuth').unbind().bind('click', function() {
 				openAuth = true
-				$('#dialogBoxClose').click()
+				document.getElementById('dialogBoxClose').click()
 			})
 		},
 		onClose: function() {
@@ -302,22 +303,30 @@ Buddy.prototype = {
 		var nickname = this.nickname
 		this.authenticated = auth
 		if (auth) {
-			$('#authenticated').attr('data-active', true)
-			$('#notAuthenticated').attr('data-active', false)
+			document.getElementById('authenticated').setAttribute('data-active', true)
+			document.getElementById('notAuthenticated').setAttribute('data-active', false)
 		}
 		else {
-			$('#authenticated').attr('data-active', false)
-			$('#notAuthenticated').attr('data-active', true)
+			document.getElementById('authenticated').setAttribute('data-active', false)
+			document.getElementById('notAuthenticated').setAttribute('data-active', true)
 		}
+	    var elements = document.querySelectorAll("span");
+        Array.prototype.forEach.call(elements, function(value, index) {
+            value.querySelector(".authStatus").setAttribute('data-auth', auth);
+        })
+
 		$.each($('span').filterByData('sender', nickname),
 			function(index, value) {
-				$(value).find('.authStatus').attr('data-auth', auth)
+			    
 			}
 		)
 		var authStatusBuffers = [
 			'groupChat',
 			Cryptodog.buddies[nickname].id
 		]
+	    Array.prototype.forEach.call(authStatusBuffers, function(thisBuffer, i) {
+            var buffer = 
+	    });
 		$.each(authStatusBuffers, function(i, thisBuffer) {
 			var buffer = $(conversationBuffers[thisBuffer])
 			$.each(buffer.find('span').filterByData('sender', nickname),
@@ -336,7 +345,7 @@ Buddy.prototype = {
 Cryptodog.addBuddy = function(nickname, id, status) {
 	if (!id) { id = getUniqueBuddyID() }
 	var buddy = Cryptodog.buddies[nickname] = new Buddy(nickname, id, status)
-	$('#buddyList').queue(function() {
+	document.getElementById('buddyList').queue(function() {
 		var buddyTemplate = Mustache.render(Cryptodog.templates.buddy, {
 			buddyID: buddy.id,
 			shortNickname: shortenString(nickname, 11),
@@ -344,13 +353,13 @@ Cryptodog.addBuddy = function(nickname, id, status) {
 		})
 		var placement = determineBuddyPlacement(nickname, id, status)
 		$(buddyTemplate).insertAfter(placement).slideDown(100, function() {
-			$('#buddy-' + buddy.id)
+			document.getElementById('buddy-' + buddy.id)
 				.unbind('click')
 				.click(function() {
 					Cryptodog.onBuddyClick($(this))
 				}
 			)
-			$('#menu-' + buddy.id).attr('status', 'inactive')
+			document.getElementById('menu-' + buddy.id).attr('status', 'inactive')
 				.unbind('click')
 				.click(function(e) {
 					e.stopPropagation()
@@ -360,17 +369,17 @@ Cryptodog.addBuddy = function(nickname, id, status) {
 			buddyNotification(nickname, true)
 		})
 	})
-	$('#buddyList').dequeue()
+	document.getElementById('buddyList').dequeue()
 	if (Cryptodog.ignoredNames.indexOf(nickname) !== -1){
 		buddy.ignored = true
-		$('#buddy-' + buddy.id).addClass('ignored')
+		document.getElementById('buddy-' + buddy.id).addClass('ignored')
 	}
 }
 
 // Set a buddy's status to `online` or `away`.
 Cryptodog.buddyStatus = function(nickname, status) {
 	Cryptodog.buddies[nickname].status = status
-	var thisBuddy = $('#buddy-' + Cryptodog.buddies[nickname].id)
+	var thisBuddy = document.getElementById('buddy-' + Cryptodog.buddies[nickname].id)
 	var placement = determineBuddyPlacement(
 		nickname, Cryptodog.buddies[nickname].id, status
 	)
@@ -467,20 +476,20 @@ Cryptodog.onBuddyClick = function(buddyElement) {
 	var nickname = Cryptodog.getBuddyNicknameByID(buddyElement.attr('data-id'))
 	buddyElement.removeClass('newMessage')
 	if (buddyElement.prev().attr('id') === 'currentConversation') {
-		$('#userInputText').focus()
+		document.getElementById('userInputText').focus()
 		return true
 	}
 	var id = buddyElement.attr('data-id')
 	Cryptodog.me.currentBuddy = id
 	initializeConversationBuffer(id)
 	// Switch currently active conversation.
-	$('#conversationWindow').html(conversationBuffers[id])
+	document.getElementById('conversationWindow').html(conversationBuffers[id])
 	bindSenderElement()
 	scrollDownConversation(0, false)
-	$('#userInputText').focus()
-	$('#buddy-' + id).addClass('currentConversation')
+	document.getElementById('userInputText').focus()
+	document.getElementById('buddy-' + id).addClass('currentConversation')
 	// Clean up finished conversations.
-	$('#buddyList div').each(function() {
+	document.getElementById('buddyList div').each(function() {
 		if ($(this).attr('data-id') !== id) {
 			$(this).removeClass('currentConversation')
 			if (
@@ -491,21 +500,21 @@ Cryptodog.onBuddyClick = function(buddyElement) {
 			}
 		}
 	})
-	$('#conversationWindow').children().addClass('visibleLine')
+	document.getElementById('conversationWindow').children().addClass('visibleLine')
 }
 
 // Close generating fingerprints dialog.
 Cryptodog.closeGenerateFingerprints = function(nickname) {
 	var state = Cryptodog.buddies[nickname].genFingerState
 	Cryptodog.buddies[nickname].genFingerState = null
-	$('#fill').stop().animate(
+	document.getElementById('fill').stop().animate(
 		{'width': '100%', 'opacity': '1'},
 		400, 'linear',
 		function() {
-			$('#dialogBoxContent').fadeOut(function() {
+			document.getElementById('dialogBoxContent').fadeOut(function() {
 				$(this).empty().show()
 				if (state.close) {
-					$('#dialogBoxClose').click()
+					document.getElementById('dialogBoxClose').click()
 				}
 				state.cb()
 			})
@@ -516,40 +525,40 @@ Cryptodog.closeGenerateFingerprints = function(nickname) {
 // Displays a pretty dialog box with `data` as the content HTML.
 Cryptodog.dialogBox = function(data, options) {
 	if (options.closeable) {
-		$('#dialogBoxClose').css('width', 18)
-		$('#dialogBoxClose').css('font-size', 12)
+		document.getElementById('dialogBoxClose').css('width', 18)
+		document.getElementById('dialogBoxClose').css('font-size', 12)
 		$(document).keydown(function(e) {
 			if (e.keyCode === 27) {
 				e.stopPropagation()
-				$('#dialogBoxClose').click()
+				document.getElementById('dialogBoxClose').click()
 				$(document).unbind('keydown')
 			}
 		})
 	}
 	if (options.extraClasses) {
-		$('#dialogBox').addClass(options.extraClasses)
+		document.getElementById('dialogBox').addClass(options.extraClasses)
 	}
-	$('#dialogBoxContent').html(data)
-	$('#dialogBox').css('height', options.height)
-	$('#dialogBox').fadeIn(200, function() {
+	document.getElementById('dialogBoxContent').html(data)
+	document.getElementById('dialogBox').css('height', options.height)
+	document.getElementById('dialogBox').fadeIn(200, function() {
 		if (options.onAppear) { options.onAppear() }
 	})
-	$('#dialogBoxClose').unbind('click').click(function(e) {
+	document.getElementById('dialogBoxClose').unbind('click').click(function(e) {
 		e.stopPropagation()
 		$(this).unbind('click')
 		if ($(this).css('width') === 0) {
 			return false
 		}
-		$('#dialogBox').fadeOut(100, function() {
+		document.getElementById('dialogBox').fadeOut(100, function() {
 			if (options.extraClasses) {
-				$('#dialogBox').removeClass(options.extraClasses)
+				document.getElementById('dialogBox').removeClass(options.extraClasses)
 			}
-			$('#dialogBoxContent').empty()
-			$('#dialogBoxClose').css('width', '0')
-			$('#dialogBoxClose').css('font-size', '0')
+			document.getElementById('dialogBoxContent').empty()
+			document.getElementById('dialogBoxClose').css('width', '0')
+			document.getElementById('dialogBoxClose').css('font-size', '0')
 			if (options.onClose) { options.onClose() }
 		})
-		$('#userInputText').focus()
+		document.getElementById('userInputText').focus()
 	})
 }
 
@@ -591,13 +600,13 @@ Cryptodog.displayInfo = function(nickname) {
 				height: 430,
 				closeable: true,
 				onAppear: function() {
-					$('#authTutorial').html(authTutorial)
+					document.getElementById('authTutorial').html(authTutorial)
 				}
 			})
 			bindAuthDialog(nickname)
 		}
-		$('#otrFingerprint').text(getFingerprint(nickname, true))
-		$('#multiPartyFingerprint').text(getFingerprint(nickname, false))
+		document.getElementById('otrFingerprint').textContent = (getFingerprint(nickname, true))
+		document.getElementById('multiPartyFingerprint').textContent = (getFingerprint(nickname, false))
 	})
 }
 
@@ -608,36 +617,36 @@ Cryptodog.logout = function() {
 		Cryptodog.me.conversation + '@'
 		+ Cryptodog.xmpp.conferenceServer
 	)
-	$('#loginInfo').text(Cryptodog.locale['loginMessage']['thankYouUsing'])
-	$('#loginInfo').animate({'background-color': '#bb7a20'}, 200)
+	document.getElementById('loginInfo').textContent = Cryptodog.locale['loginMessage']['thankYouUsing']
+	document.getElementById('loginInfo').animate({'background-color': '#bb7a20'}, 200)
 	Cryptodog.xmpp.connection.disconnect()
 	Cryptodog.xmpp.connection = null
 	document.title = 'Cryptodog'
-	$('#conversationInfo,#optionButtons').fadeOut()
-	$('#header').animate({'background-color': 'transparent'})
+	document.getElementById('conversationInfo,#optionButtons').fadeOut()
+	document.getElementById('header').animate({'background-color': 'transparent'})
 	$('.logo').animate({'margin': '-5px 5px 0 5px'})
-	$('#buddyWrapper').slideUp()
+	document.getElementById('buddyWrapper').slideUp()
 	$('.buddy').unbind('click')
 	$('.buddyMenu').unbind('click')
-	$('#buddy-groupChat').insertAfter('#buddiesOnline')
-	$('#userInput').fadeOut(function() {
-		$('#logoText').fadeIn()
-		$('#footer').animate({'height': 14})
-		$('#conversationWrapper').fadeOut(function() {
-			$('#info,#loginOptions,#version,#loginInfo').fadeIn()
-			$('#login').fadeIn(200, function() {
-				$('#login').css({opacity: 1})
-				$('#conversationName').select()
-				$('#conversationName,#nickname').removeAttr('readonly')
-				$('#loginSubmit').removeAttr('readonly')
+	document.getElementById('buddy-groupChat').insertAfter('#buddiesOnline')
+	document.getElementById('userInput').fadeOut(function() {
+		document.getElementById('logoText').fadeIn()
+		document.getElementById('footer').animate({'height': 14})
+		document.getElementById('conversationWrapper').fadeOut(function() {
+			document.getElementById('info,#loginOptions,#version,#loginInfo').fadeIn()
+			document.getElementById('login').fadeIn(200, function() {
+				document.getElementById('login').css({opacity: 1})
+				document.getElementById('conversationName').select()
+				document.getElementById('conversationName,#nickname').removeAttr('readonly')
+				document.getElementById('loginSubmit').removeAttr('readonly')
 			})
-			$('#dialogBoxClose').click()
-			$('#buddyList div').each(function() {
+			document.getElementById('dialogBoxClose').click()
+			document.getElementById('buddyList div').each(function() {
 				if ($(this).attr('id') !== 'buddy-groupChat') {
 					$(this).remove()
 				}
 			})
-			$('#conversationWindow').html('')
+			document.getElementById('conversationWindow').html('')
 			for (var b in Cryptodog.buddies) {
 				if (Cryptodog.buddies.hasOwnProperty(b)) {
 					delete Cryptodog.buddies[b]
@@ -803,10 +812,10 @@ var bindAuthDialog = function(nickname) {
 	else {
 		buddy.updateAuth(false)
 	}
-	$('#authenticated').unbind('click').bind('click', function() {
+	document.getElementById('authenticated').unbind('click').bind('click', function() {
 		buddy.updateAuth(true)
 	})
-	$('#notAuthenticated').unbind('click').bind('click', function() {
+	document.getElementById('notAuthenticated').unbind('click').bind('click', function() {
 		buddy.updateAuth(false)
 	})
 	// If the current locale doesn't have the translation
@@ -817,33 +826,33 @@ var bindAuthDialog = function(nickname) {
 	if (
 		Cryptodog.locale.language !== 'en' &&
 		Cryptodog.locale.auth.learnMoreAuth === 'Learn more about authentication') {
-		$('#authLearnMore').hide()
+		document.getElementById('authLearnMore').hide()
 	}
-	$('#authLearnMore').unbind('click').bind('click', function() {
+	document.getElementById('authLearnMore').unbind('click').bind('click', function() {
 		if ($(this).attr('data-active') === 'true') {
-			$('#authTutorial').fadeOut(function() {
-				$('#authLearnMore').attr('data-active', 'false')
-					.text(Cryptodog.locale.auth.learnMoreAuth)
+			document.getElementById('authTutorial').fadeOut(function() {
+				document.getElementById('authLearnMore').attr('data-active', 'false')
+					.textContent = (Cryptodog.locale.auth.learnMoreAuth)
 				$('.authInfo').fadeIn()
 			})
 		}
 		else {
 			$('.authInfo').fadeOut(function() {
-				$('#authLearnMore').attr('data-active', 'true')
-					.text(Cryptodog.locale.chatWindow.cont)
-				$('#authTutorial').fadeIn()
+				document.getElementById('authLearnMore').attr('data-active', 'true')
+					.textContent = (Cryptodog.locale.chatWindow.cont)
+				document.getElementById('authTutorial').fadeIn()
 			})
 		}
 	})
-	$('#authSubmit').unbind('click').bind('click', function(e) {
+	document.getElementById('authSubmit').unbind('click').bind('click', function(e) {
 		e.preventDefault()
-		var question = $('#authQuestion').val()
-		var answer = $('#authAnswer').val()
+		var question = document.getElementById('authQuestion').val()
+		var answer = document.getElementById('authAnswer').val()
 		if (answer.length === 0) {
 			return
 		}
-		$('#authSubmit').val(Cryptodog.locale.chatWindow.asking)
-		$('#authSubmit').unbind('click').bind('click', function(e) {
+		document.getElementById('authSubmit').val(Cryptodog.locale.chatWindow.asking)
+		document.getElementById('authSubmit').unbind('click').bind('click', function(e) {
 			e.preventDefault()
 		})
 		buddy.updateAuth(false)
@@ -854,22 +863,23 @@ var bindAuthDialog = function(nickname) {
 
 // Bind sender element to show authStatus information and timestamps.
 var bindSenderElement = function(senderElement) {
-	if (!senderElement) {
-		senderElement = $('.sender')
+    if (!senderElement) {
+        // TODO: unbreak this
+		senderElement = document.getElementsByClassName('sender')
 	}
-	senderElement.children().unbind('mouseenter,mouseleave,click')
+	senderElement.children.unbind('mouseenter,mouseleave,click')
 	senderElement.find('.nickname').mouseenter(function() {
-		$(this).text($(this).parent().attr('data-timestamp'))
+		this.textContent = (this.parentNode.setAttribute('data-timestamp'))
 	})
 	senderElement.find('.nickname').mouseleave(function() {
-		$(this).text($(this).parent().attr('data-sender'))
+		this.textContent = (this.parentNode.setAttribute('data-sender'))
 	})
 	senderElement.find('.authStatus').mouseenter(function() {
-		if ($(this).attr('data-auth') === 'true') {
-			$(this).attr('data-utip', Cryptodog.locale.auth.authenticated)
+		if (this.getAttribute('data-auth') === 'true') {
+			this.setAttribute('data-utip', Cryptodog.locale.auth.authenticated)
 		}
 		else {
-			$(this).attr('data-utip',
+			this.setAttribute('data-utip',
 				Mustache.render(Cryptodog.templates.authStatusFalseUtip, {
 					text: Cryptodog.locale.auth.userNotAuthenticated,
 					learnMore: Cryptodog.locale.auth.clickToLearnMore
@@ -877,20 +887,20 @@ var bindSenderElement = function(senderElement) {
 			)
 		}
 		// This is pretty ugly, sorry! Feel free to clean up via pull request.
-		var bgc = $(this).css('background-color')
-		var boxShadow = bgc.replace('rgb', 'rgba')
-			.substring(0, bgc.length - 1) + ', 0.3)'
-		$(this).attr('data-utip-style', JSON.stringify({
-			'width': 'auto',
-			'max-width': '110px',
-			'font-size': '11px',
-			'background-color': bgc,
-			'box-shadow': '0 0 0 2px ' + boxShadow
-		}))
-		$(this).attr('data-utip-click', 'Cryptodog.displayInfo()')
+	    var bgc = getComputedStyle(this, 'background-color');
+	    var boxShadow = bgc.replace('rgb', 'rgba')
+	        .substring(0, bgc.length - 1) + ', 0.3)';
+	    this.setAttribute('data-utip-style', JSON.stringify({
+	        'width': 'auto',
+	        'max-width': '110px',
+	        'font-size': '11px',
+	        'background-color': bgc,
+	        'box-shadow': '0 0 0 2px ' + boxShadow
+	    }));
+	    this.setAttribute('data-utip-click', 'Cryptodog.displayInfo()');
 	})
 	senderElement.find('.authStatus').click(function() {
-		Cryptodog.displayInfo($(this).parent().attr('data-sender'))
+		Cryptodog.displayInfo(this.parentNode.getAttribute('data-sender'))
 	})
 }
 
@@ -902,7 +912,7 @@ var handleNotificationTimeout = function() {
 		element.timeout -= 1
 		if (element.timeout <= 0) {
 			element.notification.close()
-			log("expiring notification")
+			console.log("expiring notification")
 			removalIndexes.push(currentNotifications.indexOf(element))
 		}
 	}, this)
@@ -916,7 +926,7 @@ window.setInterval(handleNotificationTimeout, 1000);
 function notificationTruncate(msg) {
     var is_firefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
     if (msg.length > 50 && is_firefox) {
-        log("Truncating notification")
+        console.log("Truncating notification")
         return msg.substring(0,50) + "..."
     }
     return msg
@@ -924,15 +934,15 @@ function notificationTruncate(msg) {
 
 var desktopNotification = function(image, title, body, timeout) {
 	if (Cryptodog.me.windowFocus) {
-		log("tried to show desktop notif, but window had focus")
+		console.log("tried to show desktop notif, but window had focus")
 		return false
 	}
 	if (!Cryptodog.desktopNotifications) {
-		log("tried to show desktop notif, but notifs are off")
+		console.log("tried to show desktop notif, but notifs are off")
 		return false
 	}
 	var notificationStatus = Notification.permission;
-	log("showing desktop notif, status is '" + notificationStatus + "', title is: " + title)
+	console.log("showing desktop notif, status is '" + notificationStatus + "', title is: " + title)
 	if (notificationStatus == 'granted') {
 		var n = new Notification(title, {
 			body: notificationTruncate(body),
@@ -972,7 +982,7 @@ var buddyNotification = function(nickname, join) {
 	initializeConversationBuffer('groupChat')
 	conversationBuffers['groupChat'] += status
 	if (Cryptodog.me.currentBuddy === 'groupChat') {
-		$('#conversationWindow').append(status)
+		document.getElementById('conversationWindow').append(status)
 	}
 	scrollDownConversation(400, true)
 	desktopNotification(notifImg,
@@ -991,7 +1001,7 @@ var sendFile = function(nickname) {
 			height: 250,
 			closeable: true
 		})
-		$('#fileSelector').change(function(e) {
+		document.getElementById('fileSelector').change(function(e) {
 			e.stopPropagation()
 			if (this.files) {
 				var file = this.files[0]
@@ -1008,8 +1018,8 @@ var sendFile = function(nickname) {
 				;delete Cryptodog.buddies[nickname].fileKey[filename]
 			}
 		})
-		$('#fileSelectButton').click(function() {
-			$('#fileSelector').click()
+		document.getElementById('fileSelectButton').click(function() {
+			document.getElementById('fileSelector').click()
 		})
 	})
 }
@@ -1019,11 +1029,11 @@ var sendFile = function(nickname) {
 // If `threshold` is true, we won't scroll down if the user
 // appears to be scrolling up to read messages.
 var scrollDownConversation = function(speed, threshold) {
-	var scrollPosition = $('#conversationWindow')[0].scrollHeight
-	scrollPosition -= $('#conversationWindow').scrollTop()
+	var scrollPosition = document.getElementById('conversationWindow')[0].scrollHeight
+	scrollPosition -= document.getElementById('conversationWindow').scrollTop()
 	if ((scrollPosition < 700) || !threshold) {
-		$('#conversationWindow').stop().animate({
-			scrollTop: $('#conversationWindow')[0].scrollHeight + 20
+		document.getElementById('conversationWindow').stop().animate({
+			scrollTop: document.getElementById('conversationWindow')[0].scrollHeight + 20
 		}, speed)
 	}
 }
@@ -1039,8 +1049,8 @@ var ensureOTRdialog = function(nickname, close, cb) {
 		height: 250,
 		closeable: true
 	})
-	$('#progressBar').css('margin', '70px auto 0 auto')
-	$('#fill').animate({'width': '100%', 'opacity': '1'}, 10000, 'linear')
+	document.getElementById('progressBar').css('margin', '70px auto 0 auto')
+	document.getElementById('fill').animate({'width': '100%', 'opacity': '1'}, 10000, 'linear')
 	// add some state for status callback
 	buddy.genFingerState = { close: close, cb: cb }
 	buddy.otr.sendQueryMsg()
@@ -1051,19 +1061,19 @@ var openBuddyMenu = function(nickname) {
 	var buddy = Cryptodog.buddies[nickname],
 		chatWindow = Cryptodog.locale.chatWindow,
 		ignoreAction = chatWindow[buddy.ignored ? 'unignore' : 'ignore'],
-		$menu = $('#menu-' + buddy.id),
-		$buddy = $('#buddy-' + buddy.id)
-	if ($menu.attr('status') === 'active') {
-		$menu.attr('status', 'inactive')
-		$menu.css('background-image', 'url("img/icons/circle-down.svg")')
-		$buddy.animate({'height': 15}, 190)
-		$('#' + buddy.id + '-contents').fadeOut(200, function() {
-			$(this).remove()
+		$menu = document.getElementById('menu-' + buddy.id),
+		$buddy = document.getElementById('buddy-' + buddy.id)
+	if ($menu.getAttribute('status') === 'active') {
+		$menu.setAttribute('status', 'inactive')
+		$menu.style.backgroundImage = 'url("img/icons/circle-down.svg")'
+		$buddy.animate({'height': 15}, 190) // ???
+		document.getElementById('' + buddy.id + '-contents').fadeOut(200, function() {
+		    this.parentNode.removeChild(this);
 		})
 		return
 	}
-	$menu.attr('status', 'active')
-	$menu.css('background-image', 'url("img/icons/circle-up.svg")')
+	$menu.setAttribute('status', 'active')
+	$menu.style.backgroundImage = 'url("img/icons/circle-up.svg")'
 	$buddy.delay(10).animate({'height': 130}, 180, function() {
 		$buddy.append(
 			Mustache.render(Cryptodog.templates.buddyMenu, {
@@ -1073,19 +1083,19 @@ var openBuddyMenu = function(nickname) {
 				ignore: ignoreAction
 			})
 		)
-		var $contents = $('#' + buddy.id + '-contents')
+		var $contents = document.getElementById('' + buddy.id + '-contents')
 		$contents.fadeIn(200)
-		$contents.find('.option1').click(function(e) {
+		$contents.querySelector('.option1').click(function(e) {
 			e.stopPropagation()
 			Cryptodog.displayInfo(nickname)
 			$menu.click()
 		})
-		$contents.find('.option2').click(function(e) {
+		$contents.findquerySelector('.option2').click(function(e) {
 			e.stopPropagation()
 			sendFile(nickname)
 			$menu.click()
 		})
-		$contents.find('.option3').click(function(e) {
+		$contents.querySelector('.option3').click(function(e) {
 			e.stopPropagation()
 			if (buddy.ignored) {
 				$buddy.removeClass('ignored')
@@ -1127,7 +1137,7 @@ var nicknameCompletion = function(input) {
         }
     }, this)
 
-	log("completion.matcher: score=" + largest.score + ", value=" + largest.value)
+	console.log("completion.matcher: score=" + largest.score + ", value=" + largest.value)
 	if (input.match(/\s/)) {
 		suffix = ' '
 	}
@@ -1187,20 +1197,20 @@ USER INTERFACE BINDINGS
 
 // Buttons:
 // Dark mode button
-$('#darkMode').click(function() {
+document.getElementById('darkMode').click(function() {
 	var $this = $(this)
 	if (document.body.classList.contains('darkMode')){
 		document.body.classList.remove('darkMode')
-		$('#darkMode').attr('data-utip', 'Dark mode')
+		document.getElementById('darkMode').attr('data-utip', 'Dark mode')
 	}
 	else {
 		document.body.classList.add('darkMode')
-		$('#darkMode').attr('data-utip', 'Light mode')
+		document.getElementById('darkMode').attr('data-utip', 'Light mode')
 	}
 })
 
 // Status button.
-$('#status').click(function() {
+document.getElementById('status').click(function() {
 	var $this = $(this)
 	if ($this.attr('src') === 'img/icons/checkmark.svg') {
 		$this.attr('src', 'img/icons/cross.svg')
@@ -1221,12 +1231,12 @@ $('#status').click(function() {
 })
 
 // My info button.
-$('#myInfo').click(function() {
+document.getElementById('myInfo').click(function() {
 	Cryptodog.displayInfo(Cryptodog.me.nickname)
 })
 
 // Desktop notifications button.
-$('#notifications').click(function() {
+document.getElementById('notifications').click(function() {
 	var $this = $(this)
 	if ($this.attr('src') === 'img/icons/bubble2.svg') {
 		$this.attr('src', 'img/icons/bubble.svg')
@@ -1267,14 +1277,14 @@ $('#notifications').click(function() {
 })
 
 // Logout button.
-$('#logout').click(function() {
+document.getElementById('logout').click(function() {
 	Cryptodog.logout()
 })
 
 // Submit user input.
-$('#userInput').submit(function() {
-	var message = $.trim($('#userInputText').val())
-	$('#userInputText').val('')
+document.getElementById('userInput').submit(function() {
+	var message = $.trim(document.getElementById('userInputText').val())
+	document.getElementById('userInputText').val('')
 	if (!message.length) { return false }
 	if (Cryptodog.me.currentBuddy !== 'groupChat') {
 		Cryptodog.buddies[
@@ -1309,7 +1319,7 @@ $('#userInput').submit(function() {
 
 // User input key event detection.
 // (Message submission, nick completion...)
-$('#userInputText').keydown(function(e) {
+document.getElementById('userInputText').addEventListener("keydown", function(e) {
 	if (e.keyCode === 9) {
 		e.preventDefault()
 		var nickComplete = nicknameCompletion($(this).val())
@@ -1319,7 +1329,7 @@ $('#userInputText').keydown(function(e) {
 	}
 	else if (e.keyCode === 13) {
 		e.preventDefault()
-		$('#userInput').submit()
+		document.getElementById('userInput').submit()
 		Cryptodog.me.composing = false
 		return true
 	}
@@ -1348,68 +1358,68 @@ $('#userInputText').keydown(function(e) {
 	}
 })
 
-$('#userInputText').keyup(function(e) {
+document.getElementById('userInputText').addEventListener("keydown", (function(e) {
 	if (e.keyCode === 13) {
 		e.preventDefault()
 	}
-})
+}))
 
-$('#userInputSubmit').click(function() {
-	$('#userInput').submit()
-	$('#userInputText').select()
+document.getElementById('userInputSubmit').addEventListener("click", function(e) {
+	document.getElementById('userInput').submit()
+	document.getElementById('userInputText').select()
 })
 
 // Language selector.
-$('#languageSelect').click(function() {
-	$('#customServerDialog').hide()
-	$('#languages li').css({'color': '#FFF', 'font-weight': 'normal'})
+document.getElementById('languageSelect').click(function() {
+	document.getElementById('customServerDialog').hide()
+	document.getElementById('languages li').css({'color': '#FFF', 'font-weight': 'normal'})
 	$('[data-locale=' + Cryptodog.locale['language'] + ']').css({
 		'color': '#CCC',
 		'font-weight': 'bold'
 	})
-	$('#footer').animate({'height': 190}, function() {
-		$('#languages').fadeIn()
+	document.getElementById('footer').animate({'height': 190}, function() {
+		document.getElementById('languages').fadeIn()
 	})
-	$('#languages li').click(function() {
+	document.getElementById('languages li').click(function() {
 		var lang = $(this).attr('data-locale')
-		$('#languages').fadeOut(200, function() {
+		document.getElementById('languages').fadeOut(200, function() {
 			Cryptodog.locale.set(lang, true)
 			Cryptodog.storage.setItem('language', lang)
-			$('#footer').animate({'height': 14})
+			document.getElementById('footer').animate({'height': 14})
 		})
 	})
 })
 
 // Login form.
-$('#conversationName').click(function() {
+document.getElementById('conversationName').click(function() {
 	$(this).select()
 })
-$('#nickname').click(function() {
+document.getElementById('nickname').click(function() {
 	$(this).select()
 })
-$('#CryptodogLogin').submit(function() {
+document.getElementById('CryptodogLogin').submit(function() {
 	// Don't submit if form is already being processed.
-	if (($('#loginSubmit').attr('readonly') === 'readonly')) {
+	if ((document.getElementById('loginSubmit').attr('readonly') === 'readonly')) {
 		return false
 	}
 	//Check validity of conversation name and nickname.
-	$('#conversationName').val($.trim($('#conversationName').val().toLowerCase()))
-	$('#nickname').val($.trim($('#nickname').val().toLowerCase()))
-	if ($('#conversationName').val() === '') {
+	document.getElementById('conversationName').val($.trim(document.getElementById('conversationName').val().toLowerCase()))
+	document.getElementById('nickname').val($.trim(document.getElementById('nickname').val().toLowerCase()))
+	if (document.getElementById('conversationName').val() === '') {
 		Cryptodog.loginFail(Cryptodog.locale['loginMessage']['enterConversation'])
-		$('#conversationName').select()
+		document.getElementById('conversationName').select()
 	}
-	else if (!$('#conversationName').val().match(/^\w{1,20}$/)) {
+	else if (!document.getElementById('conversationName').val().match(/^\w{1,20}$/)) {
 		Cryptodog.loginFail(Cryptodog.locale['loginMessage']['conversationAlphanumeric'])
-		$('#conversationName').select()
+		document.getElementById('conversationName').select()
 	}
-	else if ($('#nickname').val() === '') {
+	else if (document.getElementById('nickname').val() === '') {
 		Cryptodog.loginFail(Cryptodog.locale['loginMessage']['enterNickname'])
-		$('#nickname').select()
+		document.getElementById('nickname').select()
 	}
-	else if (!$('#nickname').val().match(/^\w{1,16}$/)) {
+	else if (!document.getElementById('nickname').val().match(/^\w{1,16}$/)) {
 		Cryptodog.loginFail(Cryptodog.locale['loginMessage']['nicknameAlphanumeric'])
-		$('#nickname').select()
+		document.getElementById('nickname').select()
 	}
 	// Prepare keys and connect.
 	else {
@@ -1441,7 +1451,7 @@ $(window).focus(function() {
 	Cryptodog.me.windowFocus = true
 	Cryptodog.newMessageCount()
 	if (Cryptodog.me.currentBuddy) {
-		$('#userInputText').focus()
+		document.getElementById('userInputText').focus()
 	}
 })
 
@@ -1463,15 +1473,15 @@ $(window).unload(function() {
 // Depending on window size
 $(window).resize(function() {
 	if ($(window).height() < 650) {
-		$('#bubble').css('margin-top', '0')
+		document.getElementById('bubble').css('margin-top', '0')
 	}
 	else {
-		$('#bubble').css('margin-top', '2%')
+		document.getElementById('bubble').css('margin-top', '2%')
 	}
 })
 $(window).resize()
 
 // Show main window.
-$('#bubble').show()
+document.getElementById('bubble').show()
 
-})}
+})
