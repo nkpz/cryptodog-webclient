@@ -7,15 +7,9 @@ Cryptodog is a community fork of the popular encrypted messaging app, [Cryptocat
 The goal of Cryptodog is to make encryption even easier to use by addressing Cryptocat's shortcomings and actively improving the app.
 
 ### Usage
-A Chrome extension will be available soon. Firefox will be supported soon after.
+A Chrome extension will be available soon.
 
-Cryptodog can be used with file:/// URIs, as well as with a local webserver.
-It is recommended to use the local webserver approach when possible, as some features do not function on file:// URIs.
-
-If you are using file:///, use branch **master**, if you are using a local webserver, use branch **gh-pages**.
-All branches other than *master* have issues with loading language files on file:/// due to limitations of the protocol.
-
-You can also run Cryptodog from our hosted client at https://cryptodog.github.io/cryptodog-webclient. Note that this is not recommended and will likely be removed as an option in the future.
+Until then, you can either build your own extension from source, or run Cryptodog from our hosted client at https://cryptodog.github.io/cryptodog-webclient. Note that once extensions are released for most major browsers, this will likely be removed as an option.
 
 ### Differences from Cryptocat
 * Dark theme with more contrast, easier on eyes
