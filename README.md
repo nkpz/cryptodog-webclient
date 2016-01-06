@@ -9,7 +9,7 @@ The goal of Cryptodog is to make encryption even easier to use by addressing Cry
 ### Usage
 A Chrome extension will be available soon.
 
-Until then, you can either build your own extension from source, or run Cryptodog from our hosted client at https://cryptodog.github.io/cryptodog-webclient. Note that once extensions are released for most major browsers, this will likely be removed as an option.
+Until then, you can either build your own extension from source, or run Cryptodog from our hosted client at https://cryptodog.github.io/cryptodog-webclient.
 
 ### Differences from Cryptocat
 * Dark theme with more contrast, easier on eyes
